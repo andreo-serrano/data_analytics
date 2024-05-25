@@ -7,9 +7,9 @@ To install and run this project, you need to follow these steps :
 #### Step 0: Clone the project
 - On Lunix/unbuntu
 ```bash
-git clone https://github.com/degbun/simple-chat-with-pdf-langchain-gemini.git
+git clone https://github.com/degbun/Q-A-with-gemini-streamlit-for-csv.git
 # enter in the cloned folder
-cd simple-chat-with-pdf-langchain-gemini
+cd Q-A-with-gemini-streamlit-for-csv
 
 ```
 
