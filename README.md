@@ -6,7 +6,7 @@ To install and run this project, you need to follow these steps :
 ```bash
 git clone 
 # enter in the cloned folder
-cd Q-A-with-gemini-streamlit-for-csv
+cd Insightify
 
 ```
 
