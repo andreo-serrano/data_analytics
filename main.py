@@ -20,7 +20,7 @@ from config import model
 from src.utils import extract_csv_content, save_uploaded_file
 
 
-logo_path = Path(r"C:\Users\andri\Desktop\DA\Insightify\insightify_logo.png")
+logo_path = Path(r"insightify_logo.png")
 
 # Function to load and encode the image to base64
 def encode_image(image_path):
