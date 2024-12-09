@@ -427,7 +427,7 @@ def main():
     st.title("dgddfgd")
 
     # File upload section
-    uploaded_file = st.file_uploader("Upload a CSV file for visualization", type="csv")
+    uploaded_file = st.file_uploader("UploadNSDSSAJJ a CSV file for visualization", type="csv")
     save_directory = "data"
     os.makedirs(save_directory, exist_ok=True)
 
