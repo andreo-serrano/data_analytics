@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.animation as animation
 import seaborn as sns
 import numpy as np
 import base64
@@ -92,13 +95,13 @@ st.markdown(
         }
         
         body {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             color: #ffffff !important; /* White font for text */
         }
 
         /* Adjust Streamlit app's container with the same gradient */
         .stApp {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             overflow: hidden;
         }
         
@@ -211,14 +214,14 @@ st.markdown(
 
         /* Style navigation bar */
         header, footer {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             color: #003366 !important; /* Dark blue font */
             border-bottom: 1px solid #80c1ff !important; /* Light blue border */
         }
 
         /* Customize buttons */
         button {
-            background-color: #003366 !important; /* Dark blue background */
+            background-color: #1E90FF !important; /* Dark blue background */
             color: #ffffff !important; /* White text */
             border-radius: 10px !important;
             font-weight: bold !important;
@@ -238,8 +241,8 @@ st.markdown(
 
         /* Input field styling */
         textarea, input {
-            background-color:  #003366 !important; /* Light blue input background */
-            color:  #ffffff !important; /* Dark blue font */
+            background-color:  #ffffff !important; /* Light blue input background */
+            color:  #000000 !important; /* Dark blue font */
             border-radius: 10px !important; /* Rounded corners */
             font-size: 14px !important; /* Set the font size */
         }
@@ -251,129 +254,102 @@ st.markdown(
 )
 
 
-
-
 # Load environment variables
 load_dotenv()
-genai.configure(api_key=os.getenv("AIzaSyAXPS3N96tyjQ3SaQgx_pgRDE_o1YbPYkk"))
+genai.configure(api_key=os.getenv("AIzaSyDQzoYfwL-1H9bE_tYez3-2-yoCIXi_Cn8"))
+
+# Theme for Seaborn
+sns.set_theme(style="whitegrid", palette="pastel")
 
 def generate_visualizations_with_gemini(cleaned_df):
-    """
-    Generates visualizations with insights and data reports for the cleaned dataset based on user selection.
-
-    Args:
-        cleaned_df (pd.DataFrame): The cleaned dataset.
-
-    Returns:
-        None
-    """
     st.markdown('<h3 style="color:white;">Choose a Visualization and View Insights with a Data Report</h3>', unsafe_allow_html=True)
-
-    # Select visualization type
     visualization_type = st.selectbox(
         "Select the type of visualization",
         ["Histogram", "Line Chart", "Box Plot", "Stacked Line Chart", "Gauge Chart"]
     )
-
-    # Select columns for visualization
     numeric_columns = cleaned_df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     column_options = st.multiselect(
         "Select columns for visualization (Choose 1 or more)",
         options=numeric_columns,
         default=numeric_columns[:1]
     )
-
     if not column_options:
         st.error("Please select at least one column.")
         return
 
-    # Generate insights, visualizations, and reports
     st.write(f"### {visualization_type} Visualization, Insights, and Data Report")
     try:
         if visualization_type == "Histogram":
             for col in column_options:
-                mean_value = cleaned_df[col].mean()
-                median_value = cleaned_df[col].median()
-                skewness = cleaned_df[col].skew()
                 st.write(f"**Data Report for Column: {col}**")
                 st.write(
-                    f"- Mean: {mean_value:.2f}\n"
-                    f"- Median: {median_value:.2f}\n"
-                    f"- Skewness: {skewness:.2f} (Indicates {'right' if skewness > 0 else 'left'} skew)\n"
-                    f"- Standard Deviation: {cleaned_df[col].std():.2f}\n"
-                    f"- Minimum Value: {cleaned_df[col].min():.2f}\n"
-                    f"- Maximum Value: {cleaned_df[col].max():.2f}"
+                    f"- Mean: {cleaned_df[col].mean():.2f}\n"
+                    f"- Median: {cleaned_df[col].median():.2f}\n"
+                    f"- Standard Deviation: {cleaned_df[col].std():.2f}"
                 )
-                fig, ax = plt.subplots()
-                sns.histplot(cleaned_df[col], bins=20, kde=True, ax=ax)
-                ax.set_title(f"Histogram for {col}")
-                st.pyplot(fig)
+                fig = px.histogram(cleaned_df, x=col, nbins=20, title=f"Histogram for {col}", marginal="box", color_discrete_sequence=["#636EFA"])
+                st.plotly_chart(fig, use_container_width=True)
 
         elif visualization_type == "Line Chart":
-            if len(column_options) < 2:
-                st.error("Please select at least two columns for a line chart.")
+            if len(column_options) < 1:
+                st.error("Please select at least one column for a line chart.")
             else:
-                col_x, col_y = column_options[:2]
-                correlation = cleaned_df[col_x].corr(cleaned_df[col_y])
-                st.write(f"**Data Report for Line Chart: {col_x} vs {col_y}**")
-                st.write(
-                    f"- Correlation Coefficient: {correlation:.2f} ("
-                    f"{'Strong' if abs(correlation) > 0.7 else 'Moderate' if abs(correlation) > 0.4 else 'Weak'} relationship)\n"
-                    f"- Trend Insights: Check for linear or non-linear relationships visually."
-                )
-                fig, ax = plt.subplots()
-                ax.plot(cleaned_df[col_x], cleaned_df[col_y], marker='o', label=f"{col_x} vs {col_y}")
-                ax.set_title(f"Line Chart: {col_x} vs {col_y}")
-                ax.legend()
-                st.pyplot(fig)
+                # Check if selected columns are numeric
+                non_numeric = [col for col in column_options if not pd.api.types.is_numeric_dtype(cleaned_df[col])]
+                if non_numeric:
+                    st.error(f"The following selected columns are not numeric: {', '.join(non_numeric)}")
+                else:
+                    # Handle missing values
+                    df_filtered = cleaned_df[column_options].dropna()
+
+                    if df_filtered.empty:
+                        st.warning("No valid data to plot after removing rows with missing values.")
+                    else:
+                        # Plot all selected columns
+                        fig = px.line(
+                            df_filtered,
+                            x=df_filtered.index,
+                            y=column_options,
+                            title=f"Line Chart for Selected Columns",
+                            markers=True,
+                            template="plotly_white",
+                            labels={"value": "Value", "index": "Index", "variable": "Column"}
+                        )
+
+                        # Add gridlines and improve layout
+                        fig.update_layout(
+                            xaxis_title="Index",
+                            yaxis_title="Values",
+                            hovermode="x unified",
+                            font=dict(size=14),
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
 
         elif visualization_type == "Box Plot":
             for col in column_options:
-                Q1 = cleaned_df[col].quantile(0.25)
-                Q3 = cleaned_df[col].quantile(0.75)
-                IQR = Q3 - Q1
-                outliers = cleaned_df[(cleaned_df[col] < (Q1 - 1.5 * IQR)) | (cleaned_df[col] > (Q3 + 1.5 * IQR))]
-                st.write(f"**Data Report for Column: {col}**")
-                st.write(
-                    f"- Q1 (25%): {Q1:.2f}\n"
-                    f"- Median (50%): {cleaned_df[col].median():.2f}\n"
-                    f"- Q3 (75%): {Q3:.2f}\n"
-                    f"- IQR (Interquartile Range): {IQR:.2f}\n"
-                    f"- Number of Outliers: {len(outliers)}"
-                )
-                fig, ax = plt.subplots()
-                sns.boxplot(y=cleaned_df[col], ax=ax)
-                ax.set_title(f"Box Plot for {col}")
-                st.pyplot(fig)
+                fig = px.box(cleaned_df, y=col, title=f"Box Plot for {col}")
+                st.plotly_chart(fig, use_container_width=True)
 
         elif visualization_type == "Stacked Line Chart":
             if len(column_options) < 2:
                 st.error("Please select at least two columns for a stacked line chart.")
             else:
-                st.write(f"**Data Report for Stacked Line Chart**")
-                st.write(f"- Selected Columns: {', '.join(column_options)}")
-                st.write(f"- Cumulative trends are visualized.")
-                fig, ax = plt.subplots()
-                stacked_data = cleaned_df[column_options].cumsum()
-                stacked_data.plot(ax=ax)
-                ax.set_title("Stacked Line Chart")
-                st.pyplot(fig)
+                fig = px.area(cleaned_df[column_options], title="Stacked Line Chart", labels={"index": "Index"})
+                st.plotly_chart(fig, use_container_width=True)
 
         elif visualization_type == "Gauge Chart":
             col = column_options[0]
             gauge_value = cleaned_df[col].mean()
-            st.write(f"**Data Report for Gauge Chart: {col}**")
-            st.write(
-                f"- Column: {col}\n"
-                f"- Average Value: {gauge_value:.2f}\n"
-                f"- Max Value: {cleaned_df[col].max():.2f}\n"
-                f"- Min Value: {cleaned_df[col].min():.2f}"
-            )
-            fig, ax = plt.subplots(figsize=(5, 3))
-            ax.barh([0], [gauge_value], color='blue', height=0.5)
-            ax.set_xlim(0, cleaned_df[col].max())
-            ax.set_title(f"Gauge Chart for {col}")
-            st.pyplot(fig)
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=gauge_value,
+                title={'text': f"Gauge Chart for {col}"},
+                gauge={
+                    'axis': {'range': [cleaned_df[col].min(), cleaned_df[col].max()]},
+                    'bar': {'color': "darkblue"}
+                }
+            ))
+            st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
