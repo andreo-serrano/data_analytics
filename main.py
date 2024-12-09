@@ -92,13 +92,13 @@ st.markdown(
         }
         
         body {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             color: #ffffff !important; /* White font for text */
         }
 
         /* Adjust Streamlit app's container with the same gradient */
         .stApp {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             overflow: hidden;
         }
         
@@ -211,14 +211,14 @@ st.markdown(
 
         /* Style navigation bar */
         header, footer {
-            background: linear-gradient(135deg, #003366, #0052cc) !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             color: #003366 !important; /* Dark blue font */
             border-bottom: 1px solid #80c1ff !important; /* Light blue border */
         }
 
         /* Customize buttons */
         button {
-            background-color: #003366 !important; /* Dark blue background */
+            background-color: #1E90FF !important; /* Dark blue background */
             color: #ffffff !important; /* White text */
             border-radius: 10px !important;
             font-weight: bold !important;
@@ -238,8 +238,8 @@ st.markdown(
 
         /* Input field styling */
         textarea, input {
-            background-color:  #003366 !important; /* Light blue input background */
-            color:  #ffffff !important; /* Dark blue font */
+            background-color:  #ffffff !important; /* Light blue input background */
+            color:  #000000 !important; /* Dark blue font */
             border-radius: 10px !important; /* Rounded corners */
             font-size: 14px !important; /* Set the font size */
         }
