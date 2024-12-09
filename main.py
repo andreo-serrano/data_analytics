@@ -1,8 +1,6 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go
 import seaborn as sns
 import numpy as np
 import base64
@@ -306,64 +304,79 @@ def generate_visualizations_with_gemini(cleaned_df):
                     f"- Minimum Value: {cleaned_df[col].min():.2f}\n"
                     f"- Maximum Value: {cleaned_df[col].max():.2f}"
                 )
-                # Use Plotly for interactive histogram
-                fig = px.histogram(cleaned_df, x=col, nbins=20, title=f"Histogram for {col}")
-                fig.update_layout(bargap=0.2)
-                st.plotly_chart(fig)
+                fig, ax = plt.subplots()
+                sns.histplot(cleaned_df[col], bins=20, kde=True, ax=ax)
+                ax.set_title(f"Histogram for {col}")
+                st.pyplot(fig)
 
         elif visualization_type == "Line Chart":
             if len(column_options) < 2:
                 st.error("Please select at least two columns for a line chart.")
             else:
-                selected_columns_df = cleaned_df[column_options]
-                fig = px.line(selected_columns_df, title="Line Chart")
-                st.plotly_chart(fig)
+                col_x, col_y = column_options[:2]
+                correlation = cleaned_df[col_x].corr(cleaned_df[col_y])
+                st.write(f"**Data Report for Line Chart: {col_x} vs {col_y}**")
+                st.write(
+                    f"- Correlation Coefficient: {correlation:.2f} ("
+                    f"{'Strong' if abs(correlation) > 0.7 else 'Moderate' if abs(correlation) > 0.4 else 'Weak'} relationship)\n"
+                    f"- Trend Insights: Check for linear or non-linear relationships visually."
+                )
+                fig, ax = plt.subplots()
+                ax.plot(cleaned_df[col_x], cleaned_df[col_y], marker='o', label=f"{col_x} vs {col_y}")
+                ax.set_title(f"Line Chart: {col_x} vs {col_y}")
+                ax.legend()
+                st.pyplot(fig)
 
         elif visualization_type == "Box Plot":
             for col in column_options:
-                fig = px.box(cleaned_df, y=col, title=f"Box Plot for {col}")
-                st.plotly_chart(fig)
+                Q1 = cleaned_df[col].quantile(0.25)
+                Q3 = cleaned_df[col].quantile(0.75)
+                IQR = Q3 - Q1
+                outliers = cleaned_df[(cleaned_df[col] < (Q1 - 1.5 * IQR)) | (cleaned_df[col] > (Q3 + 1.5 * IQR))]
+                st.write(f"**Data Report for Column: {col}**")
+                st.write(
+                    f"- Q1 (25%): {Q1:.2f}\n"
+                    f"- Median (50%): {cleaned_df[col].median():.2f}\n"
+                    f"- Q3 (75%): {Q3:.2f}\n"
+                    f"- IQR (Interquartile Range): {IQR:.2f}\n"
+                    f"- Number of Outliers: {len(outliers)}"
+                )
+                fig, ax = plt.subplots()
+                sns.boxplot(y=cleaned_df[col], ax=ax)
+                ax.set_title(f"Box Plot for {col}")
+                st.pyplot(fig)
 
         elif visualization_type == "Stacked Line Chart":
             if len(column_options) < 2:
                 st.error("Please select at least two columns for a stacked line chart.")
             else:
+                st.write(f"**Data Report for Stacked Line Chart**")
+                st.write(f"- Selected Columns: {', '.join(column_options)}")
+                st.write(f"- Cumulative trends are visualized.")
+                fig, ax = plt.subplots()
                 stacked_data = cleaned_df[column_options].cumsum()
-                fig = px.area(stacked_data, title="Stacked Line Chart", labels={"value": "Cumulative Value"})
-                st.plotly_chart(fig)
+                stacked_data.plot(ax=ax)
+                ax.set_title("Stacked Line Chart")
+                st.pyplot(fig)
 
         elif visualization_type == "Gauge Chart":
             col = column_options[0]
             gauge_value = cleaned_df[col].mean()
-            max_value = cleaned_df[col].max()
-            min_value = cleaned_df[col].min()
-
             st.write(f"**Data Report for Gauge Chart: {col}**")
             st.write(
                 f"- Column: {col}\n"
                 f"- Average Value: {gauge_value:.2f}\n"
-                f"- Max Value: {max_value:.2f}\n"
-                f"- Min Value: {min_value:.2f}"
+                f"- Max Value: {cleaned_df[col].max():.2f}\n"
+                f"- Min Value: {cleaned_df[col].min():.2f}"
             )
-
-            fig = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=gauge_value,
-                title={'text': f"{col} Gauge Chart"},
-                gauge={
-                    'axis': {'range': [min_value, max_value]},
-                    'bar': {'color': "blue"},
-                    'steps': [
-                        {'range': [min_value, (min_value + max_value) / 2], 'color': "lightgray"},
-                        {'range': [(min_value + max_value) / 2, max_value], 'color': "lightblue"}
-                    ]
-                }
-            ))
-            st.plotly_chart(fig)
+            fig, ax = plt.subplots(figsize=(5, 3))
+            ax.barh([0], [gauge_value], color='blue', height=0.5)
+            ax.set_xlim(0, cleaned_df[col].max())
+            ax.set_title(f"Gauge Chart for {col}")
+            st.pyplot(fig)
 
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
-
 def clean_data(df):
     """
     Cleans the DataFrame by handling missing values, outliers, inconsistent data types, and duplicate rows.
