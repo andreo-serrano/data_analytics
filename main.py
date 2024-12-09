@@ -165,8 +165,18 @@ st.markdown(
             padding: 10px;
         }
 
+        /* Animation to move the logo up */
+        @keyframes moveUp {
+            from {
+                margin-top: 150px; /* Initial position */
+            }
+            to {
+                margin-top: 50px; /* Final position */
+            }
+        }
+
         /* Logo styling */
-       .header-logo {
+        .header-logo {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -175,7 +185,8 @@ st.markdown(
             color: #ffffff;
             font-weight: bold;
             font-size: 24px;
-            margin-top: 25px;
+            margin-top: 150px; /* Initial position */
+            animation: moveUp 0.5s ease-in-out 2s forwards; /* Delayed movement */
         }
 
         .header-logo img {
@@ -422,12 +433,76 @@ def clean_data(df):
     df.drop_duplicates(inplace=True)
 
     return df
+def splash_screen():
+    st.markdown(
+        f"""
+        <style>
+            body {{
+                background: linear-gradient(135deg, #003366, #0052cc) !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }}
+            
+            .splash-container {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                animation: fadeIn 1.5s ease-in-out; /* Splash container fades in */
+            }}
+
+            @keyframes fadeInZoom {{
+                from {{
+                    opacity: 0.8;
+                    transform: scale(1);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: scale(1.1);
+                }}
+            }}
+            
+            /* Text below the logo */
+            .logo-text {{
+                color: white;
+                font-size: 135rem;
+                font-family: Arial, sans-serif;
+                margin-top: 20px;
+                animation: slideUp 1s ease-in-out;
+            }}
+            
+            @keyframes slideUp {{
+                from {{
+                    opacity: 0;
+                    transform: translateY(20px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateY(0);
+                }}
+            }}
+        </style>
+
+        <div class="splash-container">
+            <div class="logo-text">
+                <p>Your Scenic Data</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    # Simulate loading time
+    time.sleep(3)
 
 def main():
-    st.title("dgddfgd")
+    if "splash_shown" not in st.session_state:
+        splash_screen()
+        st.session_state.splash_shown = True  # Ensure splash is shown only once
 
     # File upload section
-    uploaded_file = st.file_uploader("UploadNSDSSAJJ a CSV file for visualization", type="csv")
+    uploaded_file = st.file_uploader("Upload a CSV file for visualization", type="csv")
     save_directory = "data"
     os.makedirs(save_directory, exist_ok=True)
 
