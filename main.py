@@ -424,7 +424,7 @@ def clean_data(df):
     return df
 
 def main():
-    st.title("")
+    st.title("dgddfgd")
 
     # File upload section
     uploaded_file = st.file_uploader("Upload a CSV file for visualization", type="csv")
