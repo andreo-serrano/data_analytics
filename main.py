@@ -377,6 +377,7 @@ def generate_visualizations_with_gemini(cleaned_df):
 
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
+        
 def clean_data(df):
     """
     Cleans the DataFrame by handling missing values, outliers, inconsistent data types, and duplicate rows.
