@@ -8,20 +8,21 @@ import seaborn as sns
 import numpy as np
 import base64
 import time
+import plotly.graph_objects as go
 import requests
-import logging
-
 
 from pathlib import Path
-
+import plotly.io as pio
 import google.generativeai as genai
 import streamlit as st
 from dotenv import load_dotenv
+from datetime import datetime
 
 from config import model
 from src.utils import extract_csv_content, save_uploaded_file
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 
+from io import BytesIO
+from fpdf import FPDF
 
 logo_path = Path(r"insightify_logo.png")
 
@@ -60,7 +61,8 @@ if logo_path.exists():
 # Add custom styles for white background, dark blue text, and light blue upload area
 st.markdown(
     """
-   <style>  
+   <style>
+        
 
         div[data-testid="stFileUploader"] label {
             color: white !important; /* Ensures label text is white for file uploaders */
@@ -103,8 +105,7 @@ st.markdown(
 
         /* Adjust Streamlit app's container with the same gradient */
         .stApp {
-            background: #42A5F5 !important; /* Gradient blue */
-            color: #ffffff !important; /* White font for text */
+            background: #1E90FF !important; /* Gradient blue */
             overflow: hidden;
         }
         
@@ -150,7 +151,6 @@ st.markdown(
         /* Add subtle animations to text */
         h1, h2, h3 {
             animation: slideIn 1.5s ease-in-out;
-            color: #ffffff !important; /* White font for text */
         }
         @keyframes slideIn {
             from {
@@ -183,30 +183,6 @@ st.markdown(
             font-weight: bold;
             font-size: 24px;
             margin-top: 25px;
-        }
-        
-         /* Animation to move the logo up */
-        @keyframes moveUp {
-            from {
-                margin-top: 150px; /* Initial position */
-            }
-            to {
-                margin-top: 50px; /* Final position */
-            }
-        }
-
-        /* Logo styling */
-        .header-logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, sans-serif;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 24px;
-            margin-top: 150px; /* Initial position */
-            animation: moveUp 0.5s ease-in-out 2s forwards; /* Delayed movement */
         }
 
         .header-logo img {
@@ -242,7 +218,7 @@ st.markdown(
 
         /* Style navigation bar */
         header, footer {
-            background: #42A5F5 !important; /* Gradient blue */
+            background: #1E90FF !important; /* Gradient blue */
             color: #003366 !important; /* Dark blue font */
             border-bottom: 1px solid #80c1ff !important; /* Light blue border */
         }
@@ -264,7 +240,7 @@ st.markdown(
 
         /* Optional: Style the header and section titles */
         h1, h2, h3, h4, h5, h6 {
-            color: #ffffff !important; /* Dark blue headers */
+            color: #003366 !important; /* Dark blue headers */
         }
 
         /* Input field styling */
@@ -281,6 +257,156 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+def generate_full_pdf(columns, cleaned_df, visualization_type):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    try:
+        if visualization_type == "Box Plot":
+            for col in columns:
+                # Add a new page for each column
+                pdf.add_page()
+                pdf.set_font("Arial", style="B", size=14)
+                pdf.cell(200, 10, txt=f"Box Plot for Column: {col}", ln=True, align="C")
+                pdf.ln(10)
+
+                # Generate and save the box plot
+                fig, ax = plt.subplots()
+                sns.boxplot(y=cleaned_df[col], ax=ax)
+                ax.set_title(f"Box Plot for {col}")
+
+                # Save the chart to a buffer
+                buf = BytesIO()
+                fig.savefig(buf, format="png")
+                plt.close(fig)
+                buf.seek(0)
+
+                # Add the chart image to the PDF
+                img_path = f"{col}_boxplot.png"
+                with open(img_path, "wb") as f:
+                    f.write(buf.getbuffer())
+                pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+                os.remove(img_path)  # Cleanup the image file after adding to PDF
+
+                # Generate Gemini API insights and add them below the chart in the PDF
+                # prompt = f"Provide insights for a box plot visualization of the column '{col}', highlighting outliers and the spread of the data."
+                # ai_insight = get_dynamic_insights_gemini(prompt, model)
+
+                # pdf.ln(50)  # Add some space after the chart
+                # pdf.set_font("Arial", size=12)
+                # pdf.multi_cell(0, 10, f"Gemini Insight: {ai_insight}")
+
+                # Move to the next line for the timestamp
+                pdf.ln(10)
+
+                # Add the timestamp at the very top right
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                pdf.set_y(10)  # Move the cursor to the top
+                pdf.set_x(200 - 10 - pdf.get_string_width(timestamp))  # Align to the right
+                pdf.set_font("Arial", size=10)
+                pdf.cell(0, 10, f"Report generated on: {timestamp}", ln=True, align="R")
+
+
+
+        elif visualization_type == "Histogram":
+            for col in columns:
+                # Calculate statistics for the histogram
+                mean = cleaned_df[col].mean()
+                median = cleaned_df[col].median()
+                std_dev = cleaned_df[col].std()
+
+                # Add a page for each column
+                pdf.add_page()
+                pdf.set_font("Arial", style="B", size=14)
+                pdf.cell(200, 10, txt=f"Histogram for Column: {col}", ln=True, align="C")
+                pdf.ln(10)
+
+                # Add statistics to the PDF
+                pdf.set_font("Arial", size=12)
+                pdf.cell(200, 10, txt=f"Mean: {mean:.2f}", ln=True)
+                pdf.cell(200, 10, txt=f"Median: {median:.2f}", ln=True)
+                pdf.cell(200, 10, txt=f"Standard Deviation: {std_dev:.2f}", ln=True)
+                pdf.ln(10)
+
+                # Generate and save the histogram
+                fig, ax = plt.subplots()
+                sns.histplot(cleaned_df[col], bins=20, kde=True, ax=ax, color="#636EFA")
+                ax.set_title(f"Histogram for {col}")
+
+                # Save the histogram to a buffer
+                buf = BytesIO()
+                fig.savefig(buf, format="png")
+                plt.close(fig)
+                buf.seek(0)
+
+                # Add the chart image to the PDF
+                img_path = f"{col}_histogram.png"
+                with open(img_path, "wb") as f:
+                    f.write(buf.getbuffer())
+                pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+                os.remove(img_path)
+
+                # Add the timestamp at the very top right
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                pdf.set_y(250)  # Move the cursor to the top
+                pdf.set_x(200 - 10 - pdf.get_string_width(timestamp))  # Align to the right
+                pdf.set_font("Arial", size=10)
+                pdf.cell(0, 10, f"Report generated on: {timestamp}", ln=True, align="R")
+
+
+        elif visualization_type == "Line Chart":
+            pdf.add_page()
+            pdf.set_font("Arial", style="B", size=14)
+            pdf.cell(200, 10, txt="Line Chart for Selected Columns", ln=True, align="C")
+            pdf.ln(10)
+
+            # Filter and plot all selected columns
+            fig, ax = plt.subplots()
+            for col in columns:
+                ax.plot(cleaned_df.index, cleaned_df[col], label=col)
+            ax.set_title("Line Chart for Selected Columns")
+            ax.set_xlabel("Index")
+            ax.set_ylabel("Values")
+            ax.legend()
+            fig.tight_layout()
+
+            # Save the chart to a buffer
+            buf = BytesIO()
+            fig.savefig(buf, format="png")
+            plt.close(fig)
+            buf.seek(0)
+
+            # Add the chart image to the PDF
+            img_path = "line_chart.png"
+            with open(img_path, "wb") as f:
+                f.write(buf.getbuffer())
+            pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+            os.remove(img_path)
+
+        elif visualization_type == "Stacked Line Chart":
+            pdf.add_page()
+            pdf.set_font("Arial", style="B", size=14)
+            pdf.cell(200, 10, txt="Stacked Line Chart", ln=True, align="C")
+            pdf.ln(10)
+
+            # Generate the stacked line chart
+            fig = px.area(cleaned_df[columns], title="Stacked Line Chart", labels={"index": "Index"})
+
+            # Save the chart to a buffer
+            buf = BytesIO()
+            fig.write_image(buf, format="png")
+            buf.seek(0)
+
+            # Add the chart image to the PDF
+            img_path = "stacked_line_chart.png"
+            with open(img_path, "wb") as f:
+                f.write(buf.getbuffer())
+            pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+
+    except Exception as e:
+        st.error(f"Error generating visualization: {e}")
+
+    return pdf
 
 # Load environment variables
 load_dotenv()
@@ -288,27 +414,6 @@ genai.configure(api_key=os.getenv("AIzaSyDQzoYfwL-1H9bE_tYez3-2-yoCIXi_Cn8"))
 
 # Theme for Seaborn
 sns.set_theme(style="whitegrid", palette="pastel")
-
-# Function to generate insights using the Gemini API via google.generativeai
-def get_dynamic_insights_gemini(prompt, model):
-    """
-    Generate dynamic insights using the Gemini API via the chat session model in config.py.
-    Args:
-        prompt (str): The prompt describing the data and visualization.
-        model (GenerativeModel): The pre-configured generative model from config.py.
-    Returns:
-        str: Generated insight from the Gemini API.
-    """
-    try:
-        # Start a chat session with the model
-        chat_session = model.start_chat(
-            history=[{"role": "user", "parts": ["The user uploaded a dataset."]}]
-        )
-        # Send the prompt and get the response
-        response = chat_session.send_message(prompt)
-        return response.text
-    except Exception as e:
-        return f"Unable to generate insights: {e}"
 
 def generate_visualizations_with_gemini(cleaned_df):
     """
@@ -337,6 +442,16 @@ def generate_visualizations_with_gemini(cleaned_df):
         return
     
     st.write(f"### {visualization_type} Visualization, Insights, and Data Report")
+
+    if visualization_type:
+        pdf = generate_full_pdf(column_options, cleaned_df, visualization_type)
+        # Provide a download link for the generated PDF
+        st.download_button(
+            label="Download PDF",
+            data=pdf.output(dest="S").encode("latin1"),
+            file_name=f"{visualization_type}_visualization_report.pdf",
+            mime="application/pdf"
+        )
     
     try:
         for col in column_options:
@@ -361,6 +476,25 @@ def generate_visualizations_with_gemini(cleaned_df):
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
 
+def get_dynamic_insights_gemini(prompt, model):
+    """
+    Generate dynamic insights using the Gemini API via the chat session model in config.py.
+    Args:
+        prompt (str): The prompt describing the data and visualization.
+        model (GenerativeModel): The pre-configured generative model from config.py.
+    Returns:
+        str: Generated insight from the Gemini API.
+    """
+    try:
+        # Start a chat session with the model
+        chat_session = model.start_chat(
+            history=[{"role": "user", "parts": ["The user uploaded a dataset."]}]
+        )
+        # Send the prompt and get the response
+        response = chat_session.send_message(prompt)
+        return response.text
+    except Exception as e:
+        return f"Unable to generate insights: {e}"
 
 # Modular functions for visualizations with Gemini API integration
 def generate_histogram_with_gemini_insights(df, col, model):
@@ -371,6 +505,9 @@ def generate_histogram_with_gemini_insights(df, col, model):
         col (str): Column to visualize.
         model (GenerativeModel): The configured Gemini model.
     """
+    st.write("A **Histogram** is a graphical representation of the distribution of a dataset. "
+            "It organizes the data into bins (intervals) and displays the frequency of data points within each bin. "
+            "This visualization is useful for understanding the shape, spread, and central tendency of the data.")
     st.write(f"- Mean: {df[col].mean():.2f}")
     st.write(f"- Median: {df[col].median():.2f}")
     st.write(f"- Std Dev: {df[col].std():.2f}")
@@ -395,6 +532,9 @@ def generate_line_chart_with_gemini_insights(df, columns, model):
         columns (list): List of columns to visualize.
         model (GenerativeModel): The configured Gemini model.
     """
+    st.write("A **Line Chart** is a type of chart that displays information as a series of data points connected by straight lines. "
+                    "It is commonly used to visualize trends over time, showing changes in data across intervals or periods. "
+                    "This visualization is particularly useful for identifying patterns, relationships, and fluctuations in datasets.")
     # Filter and clean data
     df_filtered = df[columns].dropna()
     if df_filtered.empty:
@@ -439,6 +579,10 @@ def generate_box_plot_with_gemini_insights(df, col, model):
         col (str): Column to visualize.
         model (GenerativeModel): The configured Gemini model.
     """
+    st.write("A **Box Plot** is a graphical representation of data that displays its distribution through five key summary statistics: "
+                    "minimum, first quartile (Q1), median, third quartile (Q3), and maximum. "
+                    "It is useful for identifying outliers, understanding variability, and comparing distributions across different groups.")
+
     outliers = (
         (df[col] < (df[col].quantile(0.25) - 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25)))) |
         (df[col] > (df[col].quantile(0.75) + 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25))))
@@ -462,6 +606,9 @@ def generate_stacked_line_chart_with_gemini_insights(df, columns, model):
         columns (list): List of columns to visualize.
         model (GenerativeModel): The configured Gemini model.
     """
+    st.write("A **Stacked Line Chart** is a variation of a line chart that displays multiple data series stacked on top of each other. "
+                        "It shows the cumulative effect of the data series, making it easy to visualize the contribution of each series to the total. "
+                        "This chart is particularly useful for understanding the composition and trends of data over time.")
     fig = px.area(
         df[columns],
         title="Stacked Line Chart",
@@ -483,6 +630,9 @@ def generate_gauge_chart_with_gemini_insights(df, col, model):
         col (str): Column to visualize.
         model (GenerativeModel): The configured Gemini model.
     """
+    st.write("A **Gauge Chart** is a type of data visualization that represents a single data value within a range. "
+                    "It resembles a speedometer and is often used to display performance metrics, progress towards a goal, or other key indicators. "
+                    "This chart is particularly effective for quickly conveying whether a value falls within an acceptable range.")
     gauge_value = df[col].mean()
     st.write(f"- Average Value: {gauge_value:.2f}.")
     
@@ -551,7 +701,6 @@ def clean_data(df):
 
 def main():
     st.title("")
-    
 
     # File upload section
     uploaded_file = st.file_uploader("Upload a CSV file for visualization", type="csv")
