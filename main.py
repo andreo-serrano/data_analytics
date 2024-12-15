@@ -9,6 +9,8 @@ import numpy as np
 import base64
 import time
 import requests
+import logging
+
 
 from pathlib import Path
 
@@ -18,6 +20,7 @@ from dotenv import load_dotenv
 
 from config import model
 from src.utils import extract_csv_content, save_uploaded_file
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 
 logo_path = Path(r"C:\Users\andri\Desktop\DA\Insightify\insightify_logo.png")
@@ -57,8 +60,7 @@ if logo_path.exists():
 # Add custom styles for white background, dark blue text, and light blue upload area
 st.markdown(
     """
-   <style>
-        
+   <style>  
 
         div[data-testid="stFileUploader"] label {
             color: white !important; /* Ensures label text is white for file uploaders */
@@ -101,7 +103,8 @@ st.markdown(
 
         /* Adjust Streamlit app's container with the same gradient */
         .stApp {
-            background: #1E90FF !important; /* Gradient blue */
+            background: #42A5F5 !important; /* Gradient blue */
+            color: #ffffff !important; /* White font for text */
             overflow: hidden;
         }
         
@@ -147,6 +150,7 @@ st.markdown(
         /* Add subtle animations to text */
         h1, h2, h3 {
             animation: slideIn 1.5s ease-in-out;
+            color: #ffffff !important; /* White font for text */
         }
         @keyframes slideIn {
             from {
@@ -179,6 +183,30 @@ st.markdown(
             font-weight: bold;
             font-size: 24px;
             margin-top: 25px;
+        }
+        
+         /* Animation to move the logo up */
+        @keyframes moveUp {
+            from {
+                margin-top: 150px; /* Initial position */
+            }
+            to {
+                margin-top: 50px; /* Final position */
+            }
+        }
+
+        /* Logo styling */
+        .header-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 24px;
+            margin-top: 150px; /* Initial position */
+            animation: moveUp 0.5s ease-in-out 2s forwards; /* Delayed movement */
         }
 
         .header-logo img {
@@ -214,7 +242,7 @@ st.markdown(
 
         /* Style navigation bar */
         header, footer {
-            background: #1E90FF !important; /* Gradient blue */
+            background: #42A5F5 !important; /* Gradient blue */
             color: #003366 !important; /* Dark blue font */
             border-bottom: 1px solid #80c1ff !important; /* Light blue border */
         }
@@ -236,7 +264,7 @@ st.markdown(
 
         /* Optional: Style the header and section titles */
         h1, h2, h3, h4, h5, h6 {
-            color: #003366 !important; /* Dark blue headers */
+            color: #ffffff !important; /* Dark blue headers */
         }
 
         /* Input field styling */
@@ -261,98 +289,220 @@ genai.configure(api_key=os.getenv("AIzaSyDQzoYfwL-1H9bE_tYez3-2-yoCIXi_Cn8"))
 # Theme for Seaborn
 sns.set_theme(style="whitegrid", palette="pastel")
 
+# Function to generate insights using the Gemini API via google.generativeai
+def get_dynamic_insights_gemini(prompt, model):
+    """
+    Generate dynamic insights using the Gemini API via the chat session model in config.py.
+    Args:
+        prompt (str): The prompt describing the data and visualization.
+        model (GenerativeModel): The pre-configured generative model from config.py.
+    Returns:
+        str: Generated insight from the Gemini API.
+    """
+    try:
+        # Start a chat session with the model
+        chat_session = model.start_chat(
+            history=[{"role": "user", "parts": ["The user uploaded a dataset."]}]
+        )
+        # Send the prompt and get the response
+        response = chat_session.send_message(prompt)
+        return response.text
+    except Exception as e:
+        return f"Unable to generate insights: {e}"
+
 def generate_visualizations_with_gemini(cleaned_df):
+    """
+    Generate various data visualizations and provide actionable insights using Gemini API.
+    Args:
+        cleaned_df (pd.DataFrame): The cleaned dataset to visualize.
+    """
+    from config import model  # Import the configured model from config.py
+    
     st.markdown('<h3 style="color:white;">Choose a Visualization and View Insights with a Data Report</h3>', unsafe_allow_html=True)
+    
     visualization_type = st.selectbox(
         "Select the type of visualization",
         ["Histogram", "Line Chart", "Box Plot", "Stacked Line Chart", "Gauge Chart"]
     )
+    
     numeric_columns = cleaned_df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     column_options = st.multiselect(
         "Select columns for visualization (Choose 1 or more)",
         options=numeric_columns,
         default=numeric_columns[:1]
     )
+    
     if not column_options:
         st.error("Please select at least one column.")
         return
-
+    
     st.write(f"### {visualization_type} Visualization, Insights, and Data Report")
+    
     try:
-        if visualization_type == "Histogram":
-            for col in column_options:
-                st.write(f"**Data Report for Column: {col}**")
-                st.write(
-                    f"- Mean: {cleaned_df[col].mean():.2f}\n"
-                    f"- Median: {cleaned_df[col].median():.2f}\n"
-                    f"- Standard Deviation: {cleaned_df[col].std():.2f}"
-                )
-                fig = px.histogram(cleaned_df, x=col, nbins=20, title=f"Histogram for {col}", marginal="box", color_discrete_sequence=["#636EFA"])
-                st.plotly_chart(fig, use_container_width=True)
-
-        elif visualization_type == "Line Chart":
-            if len(column_options) < 1:
-                st.error("Please select at least one column for a line chart.")
-            else:
-                # Check if selected columns are numeric
-                non_numeric = [col for col in column_options if not pd.api.types.is_numeric_dtype(cleaned_df[col])]
-                if non_numeric:
-                    st.error(f"The following selected columns are not numeric: {', '.join(non_numeric)}")
-                else:
-                    # Handle missing values
-                    df_filtered = cleaned_df[column_options].dropna()
-
-                    if df_filtered.empty:
-                        st.warning("No valid data to plot after removing rows with missing values.")
-                    else:
-                        # Plot all selected columns
-                        fig = px.line(
-                            df_filtered,
-                            x=df_filtered.index,
-                            y=column_options,
-                            title=f"Line Chart for Selected Columns",
-                            markers=True,
-                            template="plotly_white",
-                            labels={"value": "Value", "index": "Index", "variable": "Column"}
-                        )
-
-                        # Add gridlines and improve layout
-                        fig.update_layout(
-                            xaxis_title="Index",
-                            yaxis_title="Values",
-                            hovermode="x unified",
-                            font=dict(size=14),
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-
-        elif visualization_type == "Box Plot":
-            for col in column_options:
-                fig = px.box(cleaned_df, y=col, title=f"Box Plot for {col}")
-                st.plotly_chart(fig, use_container_width=True)
-
-        elif visualization_type == "Stacked Line Chart":
-            if len(column_options) < 2:
-                st.error("Please select at least two columns for a stacked line chart.")
-            else:
-                fig = px.area(cleaned_df[column_options], title="Stacked Line Chart", labels={"index": "Index"})
-                st.plotly_chart(fig, use_container_width=True)
-
-        elif visualization_type == "Gauge Chart":
-            col = column_options[0]
-            gauge_value = cleaned_df[col].mean()
-            fig = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=gauge_value,
-                title={'text': f"Gauge Chart for {col}"},
-                gauge={
-                    'axis': {'range': [cleaned_df[col].min(), cleaned_df[col].max()]},
-                    'bar': {'color': "darkblue"}
-                }
-            ))
-            st.plotly_chart(fig, use_container_width=True)
-
+        for col in column_options:
+            st.write(f"#### **Column: {col}**")
+            
+            if cleaned_df[col].isnull().any():
+                missing_percentage = cleaned_df[col].isnull().mean() * 100
+                st.warning(f"Column '{col}' has {missing_percentage:.2f}% missing values. Consider handling missing data.")
+            
+            if visualization_type == "Histogram":
+                generate_histogram_with_gemini_insights(cleaned_df, col, model)
+            elif visualization_type == "Line Chart":
+                generate_line_chart_with_gemini_insights(cleaned_df, column_options, model)
+                break
+            elif visualization_type == "Box Plot":
+                generate_box_plot_with_gemini_insights(cleaned_df, col, model)
+            elif visualization_type == "Stacked Line Chart":
+                generate_stacked_line_chart_with_gemini_insights(cleaned_df, column_options, model)
+                break
+            elif visualization_type == "Gauge Chart":
+                generate_gauge_chart_with_gemini_insights(cleaned_df, col, model)
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
+
+
+# Modular functions for visualizations with Gemini API integration
+def generate_histogram_with_gemini_insights(df, col, model):
+    """
+    Generate a histogram with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write(f"- Mean: {df[col].mean():.2f}")
+    st.write(f"- Median: {df[col].median():.2f}")
+    st.write(f"- Std Dev: {df[col].std():.2f}")
+    if df[col].skew() > 1:
+        st.warning("The data is highly skewed. Consider transforming it for better analysis.")
+    
+    fig = px.histogram(df, x=col, nbins=20, title=f"Histogram for {col}", marginal="box", color_discrete_sequence=["#636EFA"])
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a histogram visualization of the column and do not provide any negative thoughts about the dataset '{col}' with the following stats: mean={df[col].mean():.2f}, median={df[col].median():.2f}, std_dev={df[col].std():.2f}, skewness={df[col].skew():.2f}."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    # Using custom HTML to change the text color to white
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_line_chart_with_gemini_insights(df, columns, model):
+    """
+    Generate a line chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        columns (list): List of columns to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    # Filter and clean data
+    df_filtered = df[columns].dropna()
+    if df_filtered.empty:
+        st.warning("No valid data to plot after removing rows with missing values.")
+        return
+    
+    # Create the line chart
+    fig = px.line(
+        df_filtered,
+        x=df_filtered.index,
+        y=columns,
+        markers=True,
+        title="Line Chart for Selected Columns",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate a more descriptive prompt
+    prompt = (
+        f"Analyze the trends, anomalies, and patterns in the following dataset columns: {columns}. "
+        f"The data represents numeric values over an index (e.g., time or row indices). "
+        f"Here are example values from the dataset:\n\n{df[columns].head(3).to_string(index=False)}\n\n"
+        f"Focus on trends like increasing or decreasing behavior, anomalies like outliers or sudden spikes, "
+        f"and patterns like cyclical or seasonal variations."
+    )
+    
+    # Fetch insights from Gemini API
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a line chart visualization of the following columns and do not provide any negative thoughts about the dataset: {columns}. Comment on trends, anomalies, or any interesting patterns."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_box_plot_with_gemini_insights(df, col, model):
+    """
+    Generate a box plot with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    outliers = (
+        (df[col] < (df[col].quantile(0.25) - 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25)))) |
+        (df[col] > (df[col].quantile(0.75) + 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25))))
+    ).sum()
+    st.write(f"- Outliers detected: {outliers}")
+    
+    fig = px.box(df, y=col, title=f"Box Plot for {col}")
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a box plot visualization of the column '{col}', highlighting outliers and the spread of the data."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_stacked_line_chart_with_gemini_insights(df, columns, model):
+    """
+    Generate a stacked line chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        columns (list): List of columns to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    fig = px.area(
+        df[columns],
+        title="Stacked Line Chart",
+        labels={"index": "Index"}
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a stacked line chart visualization of the following columns: {columns}. Focus on overlapping trends and cumulative values."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_gauge_chart_with_gemini_insights(df, col, model):
+    """
+    Generate a gauge chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    gauge_value = df[col].mean()
+    st.write(f"- Average Value: {gauge_value:.2f}.")
+    
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=gauge_value,
+            title={'text': f"Gauge Chart for {col}"},
+            gauge={
+                'axis': {'range': [df[col].min(), df[col].max()]},
+                'bar': {'color': "darkblue"}
+            }
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a gauge chart visualization of the column '{col}' with an average value of {gauge_value:.2f}."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
 
 def clean_data(df):
     """
@@ -401,6 +551,7 @@ def clean_data(df):
 
 def main():
     st.title("")
+    
 
     # File upload section
     uploaded_file = st.file_uploader("Upload a CSV file for visualization", type="csv")

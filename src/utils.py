@@ -5,8 +5,12 @@ import time
 import pandas as pd
 import streamlit as st
 import numpy as np
+import logging
+
 from sklearn.impute import KNNImputer
 from scipy.stats import zscore
+from typing import Optional, Union
+
 
 # Custom CSS for white font
 def add_custom_css():
@@ -69,78 +73,90 @@ def save_uploaded_file(uploaded_file, save_directory):
     df = pd.read_csv(file_path)
 
     # Display the first few rows of the DataFrame
-    st.write("Uncleaned DataFrame:")
+    st.write("Uncleaned Data Frame:")
     st.dataframe(df)
     
     # Clean the data
     cleaned_df = clean_data(df)
 
     # Display the first few rows of the cleaned DataFrame
-    st.write("Cleaned DataFrame:")
+    st.write("Cleaned Data Frame:")
     st.dataframe(cleaned_df)
 
     return saved_file_path
 
-def clean_data(df):
+def clean_data(df, outlier_strategy='winsorize', log=True):
     """
     Cleans the DataFrame by handling missing values, outliers, inconsistent data types, and duplicate rows.
 
     Args:
         df (pandas.DataFrame): The DataFrame to clean.
+        outlier_strategy (str): Strategy for handling outliers. Options: 'winsorize', 'remove', or None.
+        log (bool): Whether to log cleaning steps.
 
     Returns:
         pandas.DataFrame: The cleaned DataFrame.
     """
 
-    # Handle missing values
+    if log:
+        print("Starting data cleaning process...")
+
+    # Step 1: Handle missing values
     for col in df.columns:
         if df[col].isnull().sum() > 0:
-            # Categorical features:
-            if df[col].dtype == 'object':
-                # Consider mode imputation for frequent categories:
+            if df[col].dtype == 'object':  # Categorical features
                 mode_val = df[col].mode()[0]
                 df[col].fillna(mode_val, inplace=True)
-
-            # Numerical features:
-            elif df[col].dtype == 'int64' or df[col].dtype == 'float64':
-                # Use median for robust imputation, especially in skewed distributions:
+                if log:
+                    print(f"Filled missing values in '{col}' with mode: {mode_val}.")
+            elif np.issubdtype(df[col].dtype, np.number):  # Numerical features
                 median_val = df[col].median()
                 df[col].fillna(median_val, inplace=True)
+                if log:
+                    print(f"Filled missing values in '{col}' with median: {median_val}.")
 
-                # For time series data, consider interpolation or forecasting techniques.
-
-    # Handle outliers
-    # You can use statistical methods (e.g., Z-score, IQR) or domain knowledge to identify outliers.
-    # Here's a basic example using IQR:
-    for col in df.columns:
-        if df[col].dtype == 'int64' or df[col].dtype == 'float64':
-            # Calculate quartiles and IQR
+    # Step 2: Handle outliers
+    if outlier_strategy in ['winsorize', 'remove']:
+        for col in df.select_dtypes(include=[np.number]).columns:
             Q1 = df[col].quantile(0.25)
             Q3 = df[col].quantile(0.75)
             IQR = Q3 - Q1
-
-            # Define outlier thresholds
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
 
-            # Winsorize outliers
-            df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
-            df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
+            if outlier_strategy == 'winsorize':
+                df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
+                df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
+                if log:
+                    print(f"Outliers in '{col}' winsorized to [{lower_bound}, {upper_bound}].")
+            elif outlier_strategy == 'remove':
+                df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+                if log:
+                    print(f"Outliers in '{col}' removed outside range [{lower_bound}, {upper_bound}].")
 
-
-    # Handle inconsistent data types
+    # Step 3: Handle inconsistent data types
     for col in df.columns:
         if df[col].dtype == 'object':
-            # Convert to appropriate data type if needed (e.g., datetime)
-            # Example:
-            # df[col] = pd.to_datetime(df[col], format='%Y-%m-%d')
-            pass
-        elif df[col].dtype == 'int64' or df[col].dtype == 'float64':
-            # Check for non-numeric values and handle accordingly
+            try:
+                df[col] = pd.to_datetime(df[col], errors='ignore')
+                if log:
+                    print(f"Converted '{col}' to datetime if applicable.")
+            except Exception:
+                if log:
+                    print(f"Skipped conversion of '{col}' to datetime.")
+        elif np.issubdtype(df[col].dtype, np.number):
             df[col] = pd.to_numeric(df[col], errors='coerce')
-            df[col].fillna(df[col].mean(), inplace=True)  # Fill missing values after conversion
+            df[col].fillna(df[col].mean(), inplace=True)
+            if log:
+                print(f"Ensured numeric values in '{col}', filling non-convertible entries with mean.")
 
-    # Handle duplicate rows
+    # Step 4: Handle duplicate rows
+    initial_rows = len(df)
     df.drop_duplicates(inplace=True)
+    if log:
+        print(f"Removed {initial_rows - len(df)} duplicate rows.")
 
+    if log:
+        print("Data cleaning process completed.")
+    
     return df
