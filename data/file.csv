@@ -1,201 +1,41 @@
-Brand,Model,Release Year,Price,Storage (GB),RAM (GB),Battery (mAh),Rating,Color
-Xiaomi,Model 1,2023,771,,8.0,4500.0,3.0,Black
-Google,Model 2,2022,625,,,4000.0,4.0,Green
-Apple,Model 3,2022,655,64.0,8.0,,4.0,Blue
-Samsung,Model 4,2023,771,64.0,,4000.0,,Green
-OnePlus,Model 5,2023,1055,128.0,,5000.0,,Red
-Xiaomi,Model 6,2023,578,256.0,,4000.0,1.0,Red
-Xiaomi,Model 7,2023,1010,128.0,,3000.0,5.0,White
-Apple,Model 8,2023,410,128.0,4.0,4500.0,1.0,Yellow
-Apple,Model 9,2020,454,256.0,8.0,,5.0,
-Samsung,Model 10,2022,678,64.0,8.0,4500.0,4.0,Yellow
-Google,Model 11,2023,1137,64.0,4.0,3000.0,3.0,Red
-Samsung,Model 12,2022,926,,12.0,3000.0,,Yellow
-Apple,Model 13,2021,776,128.0,6.0,3000.0,4.0,Yellow
-Google,Model 14,2020,1205,,8.0,3000.0,4.0,Yellow
-Apple,Model 15,2022,1375,,4.0,4500.0,5.0,Red
-Xiaomi,Model 16,2022,762,64.0,12.0,4500.0,2.0,Black
-Samsung,Model 17,2020,1444,256.0,12.0,4000.0,,
-Google,Model 18,2021,315,64.0,12.0,,5.0,
-Apple,Model 19,2021,603,,12.0,4500.0,3.0,Yellow
-OnePlus,Model 20,2023,946,64.0,4.0,5000.0,1.0,Blue
-Google,Model 21,2023,755,128.0,,,1.0,Yellow
-OnePlus,Model 22,2020,558,,8.0,4000.0,3.0,Green
-Google,Model 23,2021,1286,128.0,8.0,,,Green
-Samsung,Model 24,2023,1391,64.0,4.0,5000.0,5.0,White
-Xiaomi,Model 25,2023,1058,256.0,4.0,3000.0,4.0,
-OnePlus,Model 26,2021,646,256.0,12.0,,5.0,Yellow
-Samsung,Model 27,2021,902,256.0,12.0,5000.0,2.0,
-Samsung,Model 28,2023,1203,,,,2.0,Red
-OnePlus,Model 29,2021,405,,4.0,3000.0,4.0,Green
-Samsung,Model 30,2022,1210,256.0,4.0,4000.0,,Blue
-OnePlus,Model 31,2020,362,64.0,6.0,4000.0,5.0,Green
-Samsung,Model 32,2023,693,,6.0,4000.0,2.0,Green
-Samsung,Model 33,2021,887,64.0,6.0,5000.0,,
-Samsung,Model 34,2023,664,,8.0,4500.0,3.0,
-Samsung,Model 35,2023,611,,,5000.0,1.0,Red
-OnePlus,Model 36,2021,1235,256.0,8.0,4000.0,3.0,Black
-Xiaomi,Model 37,2020,1265,256.0,4.0,,4.0,Red
-Apple,Model 38,2023,343,64.0,,3000.0,3.0,Red
-Xiaomi,Model 39,2022,402,,8.0,5000.0,2.0,
-Apple,Model 40,2022,988,256.0,8.0,4000.0,4.0,White
-Google,Model 41,2023,488,64.0,,,3.0,Red
-Xiaomi,Model 42,2023,951,64.0,6.0,,2.0,Green
-Apple,Model 43,2021,1252,128.0,6.0,4500.0,1.0,Red
-OnePlus,Model 44,2020,714,256.0,4.0,4500.0,4.0,Blue
-Samsung,Model 45,2022,589,64.0,8.0,5000.0,5.0,White
-Xiaomi,Model 46,2021,848,,,4000.0,2.0,Black
-Google,Model 47,2021,1224,256.0,12.0,,1.0,Yellow
-Xiaomi,Model 48,2020,771,,4.0,4500.0,1.0,Blue
-Samsung,Model 49,2022,880,64.0,,5000.0,2.0,Yellow
-Xiaomi,Model 50,2023,418,,,4500.0,4.0,Green
-Xiaomi,Model 51,2022,599,256.0,6.0,4500.0,3.0,Green
-Xiaomi,Model 52,2022,478,256.0,8.0,5000.0,2.0,Black
-Samsung,Model 53,2022,1470,128.0,6.0,3000.0,4.0,Green
-OnePlus,Model 54,2023,1033,128.0,6.0,4000.0,,Red
-OnePlus,Model 55,2020,1024,256.0,8.0,3000.0,1.0,Red
-Google,Model 56,2023,1174,128.0,4.0,4000.0,3.0,White
-Xiaomi,Model 57,2023,698,,4.0,4000.0,1.0,
-Samsung,Model 58,2023,704,,8.0,4500.0,3.0,White
-Google,Model 59,2022,573,128.0,12.0,4500.0,3.0,White
-Xiaomi,Model 60,2021,926,256.0,8.0,,2.0,Black
-Google,Model 61,2020,1289,64.0,4.0,4500.0,,Blue
-OnePlus,Model 62,2022,947,256.0,8.0,,3.0,Blue
-Xiaomi,Model 63,2021,402,256.0,12.0,3000.0,4.0,White
-Samsung,Model 64,2023,1152,256.0,4.0,4500.0,2.0,Yellow
-OnePlus,Model 65,2022,535,256.0,8.0,4500.0,,Black
-Xiaomi,Model 66,2021,1458,,,4000.0,3.0,Yellow
-Apple,Model 67,2023,1032,64.0,6.0,4500.0,2.0,Red
-Google,Model 68,2022,420,256.0,6.0,5000.0,1.0,Blue
-Samsung,Model 69,2021,473,256.0,,5000.0,3.0,Black
-Apple,Model 70,2022,804,256.0,12.0,,5.0,Blue
-Apple,Model 71,2023,954,64.0,6.0,4000.0,,White
-Google,Model 72,2022,765,256.0,12.0,4000.0,2.0,Yellow
-OnePlus,Model 73,2021,1387,256.0,4.0,4500.0,,Green
-Apple,Model 74,2023,1109,64.0,12.0,4000.0,5.0,White
-Google,Model 75,2023,626,256.0,,5000.0,4.0,Blue
-OnePlus,Model 76,2021,798,64.0,12.0,5000.0,,Black
-Samsung,Model 77,2020,1037,64.0,6.0,3000.0,3.0,Green
-Samsung,Model 78,2022,669,,12.0,,3.0,Black
-OnePlus,Model 79,2022,362,64.0,8.0,4500.0,1.0,Black
-Google,Model 80,2022,1115,,8.0,5000.0,,Black
-Xiaomi,Model 81,2023,922,128.0,,4000.0,1.0,White
-Samsung,Model 82,2023,915,256.0,8.0,,4.0,Red
-Samsung,Model 83,2021,1005,64.0,,4500.0,3.0,Yellow
-Samsung,Model 84,2021,822,,,5000.0,4.0,Yellow
-Google,Model 85,2023,1252,,12.0,5000.0,2.0,White
-OnePlus,Model 86,2021,740,,8.0,4000.0,3.0,Black
-Google,Model 87,2020,1192,256.0,8.0,5000.0,3.0,Red
-Xiaomi,Model 88,2022,641,256.0,8.0,5000.0,3.0,Red
-Apple,Model 89,2021,1157,,8.0,3000.0,5.0,Black
-Google,Model 90,2021,1337,256.0,8.0,5000.0,,White
-Samsung,Model 91,2021,833,,8.0,4000.0,5.0,Green
-Google,Model 92,2021,1261,,6.0,4500.0,,White
-Apple,Model 93,2021,1227,128.0,6.0,3000.0,5.0,
-Samsung,Model 94,2021,624,64.0,12.0,5000.0,3.0,Red
-Apple,Model 95,2022,910,256.0,,,5.0,Black
-Samsung,Model 96,2023,436,256.0,,5000.0,4.0,Red
-Apple,Model 97,2023,513,,4.0,4500.0,4.0,Red
-Samsung,Model 98,2022,726,,4.0,3000.0,2.0,Blue
-Apple,Model 99,2023,628,64.0,4.0,4000.0,4.0,Blue
-Xiaomi,Model 100,2022,1344,,12.0,4500.0,,Blue
-Samsung,Model 101,2020,1385,256.0,,4000.0,5.0,Yellow
-Xiaomi,Model 102,2022,447,128.0,6.0,3000.0,3.0,Green
-OnePlus,Model 103,2023,590,64.0,8.0,5000.0,3.0,Green
-Xiaomi,Model 104,2022,1175,,12.0,5000.0,4.0,Green
-Google,Model 105,2022,1093,64.0,12.0,4500.0,,Blue
-Samsung,Model 106,2021,739,,,4500.0,,Black
-Apple,Model 107,2022,1193,,4.0,4500.0,4.0,Black
-Xiaomi,Model 108,2020,968,256.0,12.0,3000.0,,
-Apple,Model 109,2023,1287,,6.0,3000.0,2.0,Red
-Apple,Model 110,2022,1046,64.0,4.0,5000.0,5.0,Black
-Apple,Model 111,2023,928,128.0,4.0,5000.0,2.0,Blue
-Google,Model 112,2021,383,256.0,4.0,5000.0,2.0,Blue
-Google,Model 113,2020,858,256.0,6.0,3000.0,4.0,Yellow
-Apple,Model 114,2020,1110,64.0,6.0,4500.0,5.0,
-Samsung,Model 115,2023,1285,256.0,4.0,4500.0,1.0,Green
-Samsung,Model 116,2021,719,256.0,12.0,5000.0,5.0,Blue
-OnePlus,Model 117,2020,322,128.0,6.0,4000.0,1.0,Red
-Samsung,Model 118,2021,842,128.0,,,4.0,Red
-Google,Model 119,2021,1304,64.0,8.0,5000.0,1.0,White
-Samsung,Model 120,2020,387,,4.0,3000.0,5.0,Blue
-Apple,Model 121,2020,1490,128.0,12.0,3000.0,4.0,Red
-Google,Model 122,2023,973,64.0,8.0,,4.0,Black
-OnePlus,Model 123,2020,1270,256.0,6.0,4500.0,,Green
-Google,Model 124,2020,1020,128.0,4.0,5000.0,1.0,Yellow
-Google,Model 125,2021,1185,128.0,8.0,5000.0,,Blue
-OnePlus,Model 126,2022,759,256.0,,3000.0,4.0,Yellow
-Samsung,Model 127,2021,736,128.0,,4000.0,,Blue
-OnePlus,Model 128,2022,739,64.0,8.0,3000.0,4.0,Black
-Google,Model 129,2021,1341,64.0,4.0,3000.0,,Green
-Samsung,Model 130,2023,1316,128.0,,4000.0,4.0,White
-Apple,Model 131,2020,820,64.0,6.0,3000.0,4.0,Blue
-Xiaomi,Model 132,2022,1226,,8.0,,4.0,Green
-Google,Model 133,2022,388,64.0,6.0,4000.0,5.0,White
-Google,Model 134,2023,775,256.0,6.0,3000.0,3.0,Green
-Samsung,Model 135,2021,1464,128.0,4.0,4500.0,,Black
-Apple,Model 136,2022,1112,128.0,4.0,4000.0,1.0,Blue
-Xiaomi,Model 137,2021,1260,128.0,8.0,4500.0,3.0,Black
-Apple,Model 138,2020,571,256.0,,,,Green
-Samsung,Model 139,2022,657,128.0,,5000.0,,Yellow
-Samsung,Model 140,2021,324,256.0,8.0,,,Yellow
-Xiaomi,Model 141,2023,315,64.0,6.0,5000.0,5.0,Blue
-Google,Model 142,2021,1387,64.0,12.0,4500.0,4.0,Green
-OnePlus,Model 143,2022,1250,128.0,8.0,5000.0,,Black
-OnePlus,Model 144,2021,452,,8.0,,5.0,Yellow
-Samsung,Model 145,2020,1278,64.0,8.0,3000.0,5.0,White
-Google,Model 146,2021,598,,8.0,5000.0,4.0,Blue
-OnePlus,Model 147,2022,556,128.0,8.0,,2.0,
-Apple,Model 148,2020,615,256.0,,3000.0,5.0,
-OnePlus,Model 149,2023,471,,12.0,,3.0,White
-Apple,Model 150,2021,1166,,,,5.0,Green
-Apple,Model 151,2020,502,,12.0,4500.0,2.0,Black
-Google,Model 152,2023,1171,,4.0,4500.0,,
-OnePlus,Model 153,2021,314,64.0,8.0,3000.0,4.0,Black
-Apple,Model 154,2022,1162,256.0,,5000.0,2.0,
-Apple,Model 155,2023,441,128.0,12.0,,2.0,White
-OnePlus,Model 156,2020,1290,,4.0,5000.0,4.0,
-Samsung,Model 157,2020,302,64.0,12.0,3000.0,3.0,Red
-OnePlus,Model 158,2020,503,,12.0,4500.0,3.0,White
-OnePlus,Model 159,2022,574,,6.0,4000.0,2.0,White
-OnePlus,Model 160,2022,1301,128.0,12.0,4000.0,1.0,Green
-Samsung,Model 161,2020,1403,128.0,8.0,4000.0,1.0,Green
-Apple,Model 162,2023,518,256.0,,3000.0,,White
-Google,Model 163,2023,1240,64.0,8.0,4000.0,2.0,Blue
-Google,Model 164,2020,1081,256.0,12.0,3000.0,,Red
-OnePlus,Model 165,2023,441,64.0,8.0,3000.0,4.0,Blue
-Xiaomi,Model 166,2022,819,128.0,6.0,4000.0,2.0,
-Apple,Model 167,2022,1162,128.0,6.0,5000.0,4.0,
-Xiaomi,Model 168,2021,1178,256.0,4.0,4500.0,5.0,White
-Xiaomi,Model 169,2023,1403,,4.0,4000.0,2.0,Blue
-Samsung,Model 170,2020,1263,256.0,8.0,5000.0,2.0,Red
-Google,Model 171,2023,493,64.0,4.0,,3.0,Yellow
-Samsung,Model 172,2020,1178,,,4000.0,1.0,Blue
-Xiaomi,Model 173,2021,1046,256.0,,4000.0,2.0,Black
-OnePlus,Model 174,2022,540,,4.0,4500.0,5.0,Black
-Samsung,Model 175,2020,674,256.0,6.0,,5.0,Black
-Samsung,Model 176,2022,1028,256.0,6.0,4500.0,1.0,Yellow
-Google,Model 177,2021,1188,128.0,8.0,4000.0,,Blue
-Apple,Model 178,2022,954,256.0,,4000.0,2.0,Green
-Xiaomi,Model 179,2020,337,128.0,,4000.0,4.0,
-Apple,Model 180,2022,739,256.0,,4000.0,3.0,Green
-Google,Model 181,2021,375,,,3000.0,5.0,
-Xiaomi,Model 182,2021,442,256.0,4.0,4500.0,2.0,White
-OnePlus,Model 183,2023,1280,64.0,12.0,5000.0,2.0,White
-Xiaomi,Model 184,2022,684,256.0,8.0,4500.0,4.0,Blue
-OnePlus,Model 185,2022,314,128.0,,4000.0,3.0,Red
-Google,Model 186,2022,1033,,6.0,4500.0,4.0,
-Apple,Model 187,2022,1291,,,4500.0,,
-Xiaomi,Model 188,2023,777,,4.0,5000.0,4.0,White
-Xiaomi,Model 189,2021,762,128.0,6.0,4000.0,1.0,White
-Xiaomi,Model 190,2020,1441,128.0,,3000.0,4.0,Green
-OnePlus,Model 191,2020,333,,12.0,3000.0,5.0,Blue
-OnePlus,Model 192,2022,707,64.0,6.0,3000.0,,Green
-Apple,Model 193,2020,592,128.0,12.0,,2.0,White
-Apple,Model 194,2020,865,128.0,6.0,5000.0,,Blue
-Google,Model 195,2020,1032,,4.0,,5.0,Blue
-OnePlus,Model 196,2020,634,256.0,12.0,,,
-Google,Model 197,2020,784,64.0,,5000.0,4.0,Red
-OnePlus,Model 198,2020,578,128.0,12.0,4000.0,5.0,Yellow
-Samsung,Model 199,2022,804,64.0,,3000.0,4.0,
-Samsung,Model 200,2020,1302,64.0,6.0,4500.0,5.0,
+gender,age,Investment_Avenues,Mutual_Funds,Equity_Market,Debentures,Government_Bonds,Fixed_Deposits,PPF,Gold,Stock_Marktet,Factor,Objective,Purpose,Duration,Invest_Monitor,Expect,Avenue,What are your savings objectives?,Reason_Equity,Reason_Mutual,Reason_Bonds,Reason_FD,Source
+Female,34,Yes,1,2,5,3,7,6,4,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Safe Investment,Fixed Returns,Newspapers and Magazines
+Female,23,Yes,4,3,2,1,5,6,7,No,Locking Period,Capital Appreciation,Wealth Creation,More than 5 years,Weekly,20%-30%,Mutual Fund,Health Care,Dividend,Better Returns,Safe Investment,High Interest Rates,Financial Consultants
+Male,30,Yes,3,6,4,2,5,1,7,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Daily,20%-30%,Equity,Retirement Plan,Capital Appreciation,Tax Benefits,Assured Returns,Fixed Returns,Television
+Male,22,Yes,2,1,3,7,6,4,5,Yes,Returns,Income,Wealth Creation,Less than 1 year,Daily,10%-20%,Equity,Retirement Plan,Dividend,Fund Diversification,Tax Incentives,High Interest Rates,Internet
+Female,24,No,2,1,3,6,4,5,7,No,Returns,Income,Wealth Creation,Less than 1 year,Daily,20%-30%,Equity,Retirement Plan,Capital Appreciation,Better Returns,Safe Investment,Risk Free,Internet
+Female,24,No,7,5,4,6,3,1,2,No,Risk,Capital Appreciation,Wealth Creation,1-3 years,Daily,30%-40%,Mutual Fund,Retirement Plan,Liquidity,Fund Diversification,Safe Investment,Risk Free,Internet
+Female,27,Yes,3,6,4,2,5,1,7,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Equity,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,High Interest Rates,Financial Consultants
+Male,21,Yes,2,3,7,4,6,1,5,Yes,Risk,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Newspapers and Magazines
+Male,35,Yes,2,4,7,5,3,1,6,Yes,Returns,Growth,Savings for Future,1-3 years,Weekly,20%-30%,Equity,Retirement Plan,Capital Appreciation,Fund Diversification,Safe Investment,Fixed Returns,Television
+Male,31,Yes,1,3,7,4,5,2,6,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,30%-40%,Fixed Deposits,Retirement Plan,Capital Appreciation,Fund Diversification,Assured Returns,Fixed Returns,Newspapers and Magazines
+Female,35,Yes,2,4,7,5,3,1,6,Yes,Risk,Growth,Savings for Future,3-5 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Financial Consultants
+Male,29,Yes,2,5,7,6,3,1,4,Yes,Risk,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Fund Diversification,Assured Returns,Fixed Returns,Financial Consultants
+Female,21,No,1,2,3,4,5,6,7,No,Returns,Capital Appreciation,Savings for Future,1-3 years,Weekly,20%-30%,Mutual Fund,Education,Dividend,Better Returns,Safe Investment,Risk Free,Internet
+Female,28,Yes,2,3,7,4,5,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Fund Diversification,Assured Returns,Risk Free,Newspapers and Magazines
+Female,25,Yes,2,3,7,5,4,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Fixed Deposits,Health Care,Dividend,Better Returns,Assured Returns,Risk Free,Financial Consultants
+Male,27,Yes,2,3,7,5,4,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Health Care,Capital Appreciation,Fund Diversification,Assured Returns,Risk Free,Newspapers and Magazines
+Female,28,Yes,3,2,7,5,4,1,6,Yes,Risk,Growth,Wealth Creation,1-3 years,Monthly,20%-30%,Fixed Deposits,Health Care,Capital Appreciation,Fund Diversification,Assured Returns,Risk Free,Television
+Male,27,Yes,3,2,7,4,5,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Financial Consultants
+Male,29,Yes,3,2,7,4,5,1,6,Yes,Risk,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Newspapers and Magazines
+Male,26,Yes,3,4,6,5,1,2,7,Yes,Risk,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Fixed Deposits,Health Care,Capital Appreciation,Fund Diversification,Assured Returns,Risk Free,Newspapers and Magazines
+Male,29,Yes,2,4,7,5,3,1,6,Yes,Returns,Growth,Wealth Creation,3-5 years,Weekly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Fixed Returns,Financial Consultants
+Female,24,Yes,2,4,5,6,3,1,7,Yes,Risk,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Equity,Health Care,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Newspapers and Magazines
+Male,27,Yes,3,4,6,5,2,1,7,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Financial Consultants
+Male,25,Yes,2,4,6,5,3,1,7,Yes,Risk,Growth,Savings for Future,3-5 years,Weekly,20%-30%,Public Provident Fund,Health Care,Liquidity,Better Returns,Assured Returns,Risk Free,Financial Consultants
+Female,26,Yes,2,3,7,5,4,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,30%-40%,Public Provident Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Newspapers and Magazines
+Female,32,Yes,3,4,7,5,1,2,6,Yes,Risk,Growth,Wealth Creation,3-5 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Fixed Returns,Financial Consultants
+Male,26,Yes,3,4,6,5,1,2,7,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Mutual Fund,Retirement Plan,Dividend,Fund Diversification,Assured Returns,Fixed Returns,Financial Consultants
+Male,31,Yes,2,3,7,6,4,1,5,Yes,Risk,Growth,Savings for Future,1-3 years,Monthly,20%-30%,Fixed Deposits,Health Care,Capital Appreciation,Fund Diversification,Safe Investment,Fixed Returns,Television
+Male,29,Yes,2,3,6,5,1,4,7,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Equity,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Television
+Female,34,Yes,5,4,3,2,7,1,6,Yes,Returns,Income,Returns,3-5 years,Monthly,10%-20%,Mutual Fund,Retirement Plan,Capital Appreciation,Tax Benefits,Safe Investment,Fixed Returns,Newspapers and Magazines
+Male,27,Yes,4,5,1,2,7,3,6,No,Returns,Growth,Wealth Creation,1-3 years,Monthly,10%-20%,Mutual Fund,Education,Capital Appreciation,Tax Benefits,Safe Investment,Fixed Returns,Television
+Female,31,Yes,2,4,7,6,3,1,5,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Fixed Deposits,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Fixed Returns,Financial Consultants
+Male,27,Yes,2,4,7,5,1,3,6,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,30%-40%,Equity,Health Care,Capital Appreciation,Fund Diversification,Assured Returns,Fixed Returns,Newspapers and Magazines
+Male,26,Yes,2,3,6,4,1,5,7,Yes,Returns,Capital Appreciation,Returns,1-3 years,Monthly,20%-30%,Fixed Deposits,Education,Dividend,Better Returns,Safe Investment,Risk Free,Newspapers and Magazines
+Male,27,Yes,2,3,6,5,4,1,7,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Weekly,20%-30%,Mutual Fund,Health Care,Capital Appreciation,Better Returns,Safe Investment,Fixed Returns,Financial Consultants
+Male,30,Yes,1,4,6,5,3,2,7,Yes,Risk,Growth,Wealth Creation,3-5 years,Monthly,20%-30%,Fixed Deposits,Health Care,Capital Appreciation,Better Returns,Assured Returns,Fixed Returns,Financial Consultants
+Male,30,Yes,2,4,7,5,1,3,6,Yes,Returns,Capital Appreciation,Wealth Creation,1-3 years,Monthly,20%-30%,Equity,Retirement Plan,Capital Appreciation,Better Returns,Assured Returns,Risk Free,Newspapers and Magazines
+Male,25,Yes,5,4,7,6,1,2,3,Yes,Risk,Growth,Savings for Future,3-5 years,Monthly,30%-40%,Public Provident Fund,Health Care,Capital Appreciation,Better Returns,Safe Investment,Fixed Returns,Financial Consultants
+Male,31,Yes,2,4,7,5,3,1,6,Yes,Risk,Growth,Wealth Creation,1-3 years,Weekly,20%-30%,Equity,Health Care,Dividend,Fund Diversification,Assured Returns,Fixed Returns,Newspapers and Magazines
+Male,29,Yes,4,3,5,7,2,1,6,Yes,Returns,Capital Appreciation,Wealth Creation,3-5 years,Monthly,20%-30%,Fixed Deposits,Retirement Plan,Dividend,Better Returns,Safe Investment,Fixed Returns,Financial Consultants

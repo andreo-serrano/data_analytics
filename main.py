@@ -1,21 +1,28 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.animation as animation
 import seaborn as sns
 import numpy as np
 import base64
 import time
+import plotly.graph_objects as go
 import requests
 
 from pathlib import Path
-
+import plotly.io as pio
 import google.generativeai as genai
 import streamlit as st
 from dotenv import load_dotenv
+from datetime import datetime
 
 from config import model
 from src.utils import extract_csv_content, save_uploaded_file
 
+from io import BytesIO
+from fpdf import FPDF
 
 logo_path = Path(r"insightify_logo.png")
 
@@ -250,133 +257,402 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+def generate_full_pdf(columns, cleaned_df, visualization_type):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    try:
+        if visualization_type == "Box Plot":
+            for col in columns:
+                # Add a new page for each column
+                pdf.add_page()
+                pdf.set_font("Arial", style="B", size=14)
+                pdf.cell(200, 10, txt=f"Box Plot for Column: {col}", ln=True, align="C")
+                pdf.ln(10)
+
+                # Generate and save the box plot
+                fig, ax = plt.subplots()
+                sns.boxplot(y=cleaned_df[col], ax=ax)
+                ax.set_title(f"Box Plot for {col}")
+
+                # Save the chart to a buffer
+                buf = BytesIO()
+                fig.savefig(buf, format="png")
+                plt.close(fig)
+                buf.seek(0)
+
+                # Add the chart image to the PDF
+                img_path = f"{col}_boxplot.png"
+                with open(img_path, "wb") as f:
+                    f.write(buf.getbuffer())
+                pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+                os.remove(img_path)  # Cleanup the image file after adding to PDF
+
+                # Generate Gemini API insights and add them below the chart in the PDF
+                # prompt = f"Provide insights for a box plot visualization of the column '{col}', highlighting outliers and the spread of the data."
+                # ai_insight = get_dynamic_insights_gemini(prompt, model)
+
+                # pdf.ln(50)  # Add some space after the chart
+                # pdf.set_font("Arial", size=12)
+                # pdf.multi_cell(0, 10, f"Gemini Insight: {ai_insight}")
+
+                # Move to the next line for the timestamp
+                pdf.ln(10)
+
+                # Add the timestamp at the very top right
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                pdf.set_y(10)  # Move the cursor to the top
+                pdf.set_x(200 - 10 - pdf.get_string_width(timestamp))  # Align to the right
+                pdf.set_font("Arial", size=10)
+                pdf.cell(0, 10, f"Report generated on: {timestamp}", ln=True, align="R")
 
 
+
+        elif visualization_type == "Histogram":
+            for col in columns:
+                # Calculate statistics for the histogram
+                mean = cleaned_df[col].mean()
+                median = cleaned_df[col].median()
+                std_dev = cleaned_df[col].std()
+
+                # Add a page for each column
+                pdf.add_page()
+                pdf.set_font("Arial", style="B", size=14)
+                pdf.cell(200, 10, txt=f"Histogram for Column: {col}", ln=True, align="C")
+                pdf.ln(10)
+
+                # Add statistics to the PDF
+                pdf.set_font("Arial", size=12)
+                pdf.cell(200, 10, txt=f"Mean: {mean:.2f}", ln=True)
+                pdf.cell(200, 10, txt=f"Median: {median:.2f}", ln=True)
+                pdf.cell(200, 10, txt=f"Standard Deviation: {std_dev:.2f}", ln=True)
+                pdf.ln(10)
+
+                # Generate and save the histogram
+                fig, ax = plt.subplots()
+                sns.histplot(cleaned_df[col], bins=20, kde=True, ax=ax, color="#636EFA")
+                ax.set_title(f"Histogram for {col}")
+
+                # Save the histogram to a buffer
+                buf = BytesIO()
+                fig.savefig(buf, format="png")
+                plt.close(fig)
+                buf.seek(0)
+
+                # Add the chart image to the PDF
+                img_path = f"{col}_histogram.png"
+                with open(img_path, "wb") as f:
+                    f.write(buf.getbuffer())
+                pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+                os.remove(img_path)
+
+                # Add the timestamp at the very top right
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                pdf.set_y(250)  # Move the cursor to the top
+                pdf.set_x(200 - 10 - pdf.get_string_width(timestamp))  # Align to the right
+                pdf.set_font("Arial", size=10)
+                pdf.cell(0, 10, f"Report generated on: {timestamp}", ln=True, align="R")
+
+
+        elif visualization_type == "Line Chart":
+            pdf.add_page()
+            pdf.set_font("Arial", style="B", size=14)
+            pdf.cell(200, 10, txt="Line Chart for Selected Columns", ln=True, align="C")
+            pdf.ln(10)
+
+            # Filter and plot all selected columns
+            fig, ax = plt.subplots()
+            for col in columns:
+                ax.plot(cleaned_df.index, cleaned_df[col], label=col)
+            ax.set_title("Line Chart for Selected Columns")
+            ax.set_xlabel("Index")
+            ax.set_ylabel("Values")
+            ax.legend()
+            fig.tight_layout()
+
+            # Save the chart to a buffer
+            buf = BytesIO()
+            fig.savefig(buf, format="png")
+            plt.close(fig)
+            buf.seek(0)
+
+            # Add the chart image to the PDF
+            img_path = "line_chart.png"
+            with open(img_path, "wb") as f:
+                f.write(buf.getbuffer())
+            pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+            os.remove(img_path)
+
+        elif visualization_type == "Stacked Line Chart":
+            pdf.add_page()
+            pdf.set_font("Arial", style="B", size=14)
+            pdf.cell(200, 10, txt="Stacked Line Chart", ln=True, align="C")
+            pdf.ln(10)
+
+            # Generate the stacked line chart
+            fig = px.area(cleaned_df[columns], title="Stacked Line Chart", labels={"index": "Index"})
+
+            # Save the chart to a buffer
+            buf = BytesIO()
+            fig.write_image(buf, format="png")
+            buf.seek(0)
+
+            # Add the chart image to the PDF
+            img_path = "stacked_line_chart.png"
+            with open(img_path, "wb") as f:
+                f.write(buf.getbuffer())
+            pdf.image(img_path, x=10, y=pdf.get_y(), w=190)
+
+    except Exception as e:
+        st.error(f"Error generating visualization: {e}")
+
+    return pdf
 
 # Load environment variables
 load_dotenv()
-genai.configure(api_key=os.getenv("AIzaSyAXPS3N96tyjQ3SaQgx_pgRDE_o1YbPYkk"))
+genai.configure(api_key=os.getenv("AIzaSyDQzoYfwL-1H9bE_tYez3-2-yoCIXi_Cn8"))
+
+# Theme for Seaborn
+sns.set_theme(style="whitegrid", palette="pastel")
 
 def generate_visualizations_with_gemini(cleaned_df):
     """
-    Generates visualizations with insights and data reports for the cleaned dataset based on user selection.
-
+    Generate various data visualizations and provide actionable insights using Gemini API.
     Args:
-        cleaned_df (pd.DataFrame): The cleaned dataset.
-
-    Returns:
-        None
+        cleaned_df (pd.DataFrame): The cleaned dataset to visualize.
     """
+    from config import model  # Import the configured model from config.py
+    
     st.markdown('<h3 style="color:white;">Choose a Visualization and View Insights with a Data Report</h3>', unsafe_allow_html=True)
-
-    # Select visualization type
+    
     visualization_type = st.selectbox(
         "Select the type of visualization",
         ["Histogram", "Line Chart", "Box Plot", "Stacked Line Chart", "Gauge Chart"]
     )
-
-    # Select columns for visualization
+    
     numeric_columns = cleaned_df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     column_options = st.multiselect(
         "Select columns for visualization (Choose 1 or more)",
         options=numeric_columns,
         default=numeric_columns[:1]
     )
-
+    
     if not column_options:
         st.error("Please select at least one column.")
         return
-
-    # Generate insights, visualizations, and reports
+    
     st.write(f"### {visualization_type} Visualization, Insights, and Data Report")
+
+    if visualization_type:
+        pdf = generate_full_pdf(column_options, cleaned_df, visualization_type)
+        # Provide a download link for the generated PDF
+        st.download_button(
+            label="Download PDF",
+            data=pdf.output(dest="S").encode("latin1"),
+            file_name=f"{visualization_type}_visualization_report.pdf",
+            mime="application/pdf"
+        )
+    
     try:
-        if visualization_type == "Histogram":
-            for col in column_options:
-                mean_value = cleaned_df[col].mean()
-                median_value = cleaned_df[col].median()
-                skewness = cleaned_df[col].skew()
-                st.write(f"**Data Report for Column: {col}**")
-                st.write(
-                    f"- Mean: {mean_value:.2f}\n"
-                    f"- Median: {median_value:.2f}\n"
-                    f"- Skewness: {skewness:.2f} (Indicates {'right' if skewness > 0 else 'left'} skew)\n"
-                    f"- Standard Deviation: {cleaned_df[col].std():.2f}\n"
-                    f"- Minimum Value: {cleaned_df[col].min():.2f}\n"
-                    f"- Maximum Value: {cleaned_df[col].max():.2f}"
-                )
-                fig, ax = plt.subplots()
-                sns.histplot(cleaned_df[col], bins=20, kde=True, ax=ax)
-                ax.set_title(f"Histogram for {col}")
-                st.pyplot(fig)
-
-        elif visualization_type == "Line Chart":
-            if len(column_options) < 2:
-                st.error("Please select at least two columns for a line chart.")
-            else:
-                col_x, col_y = column_options[:2]
-                correlation = cleaned_df[col_x].corr(cleaned_df[col_y])
-                st.write(f"**Data Report for Line Chart: {col_x} vs {col_y}**")
-                st.write(
-                    f"- Correlation Coefficient: {correlation:.2f} ("
-                    f"{'Strong' if abs(correlation) > 0.7 else 'Moderate' if abs(correlation) > 0.4 else 'Weak'} relationship)\n"
-                    f"- Trend Insights: Check for linear or non-linear relationships visually."
-                )
-                fig, ax = plt.subplots()
-                ax.plot(cleaned_df[col_x], cleaned_df[col_y], marker='o', label=f"{col_x} vs {col_y}")
-                ax.set_title(f"Line Chart: {col_x} vs {col_y}")
-                ax.legend()
-                st.pyplot(fig)
-
-        elif visualization_type == "Box Plot":
-            for col in column_options:
-                Q1 = cleaned_df[col].quantile(0.25)
-                Q3 = cleaned_df[col].quantile(0.75)
-                IQR = Q3 - Q1
-                outliers = cleaned_df[(cleaned_df[col] < (Q1 - 1.5 * IQR)) | (cleaned_df[col] > (Q3 + 1.5 * IQR))]
-                st.write(f"**Data Report for Column: {col}**")
-                st.write(
-                    f"- Q1 (25%): {Q1:.2f}\n"
-                    f"- Median (50%): {cleaned_df[col].median():.2f}\n"
-                    f"- Q3 (75%): {Q3:.2f}\n"
-                    f"- IQR (Interquartile Range): {IQR:.2f}\n"
-                    f"- Number of Outliers: {len(outliers)}"
-                )
-                fig, ax = plt.subplots()
-                sns.boxplot(y=cleaned_df[col], ax=ax)
-                ax.set_title(f"Box Plot for {col}")
-                st.pyplot(fig)
-
-        elif visualization_type == "Stacked Line Chart":
-            if len(column_options) < 2:
-                st.error("Please select at least two columns for a stacked line chart.")
-            else:
-                st.write(f"**Data Report for Stacked Line Chart**")
-                st.write(f"- Selected Columns: {', '.join(column_options)}")
-                st.write(f"- Cumulative trends are visualized.")
-                fig, ax = plt.subplots()
-                stacked_data = cleaned_df[column_options].cumsum()
-                stacked_data.plot(ax=ax)
-                ax.set_title("Stacked Line Chart")
-                st.pyplot(fig)
-
-        elif visualization_type == "Gauge Chart":
-            col = column_options[0]
-            gauge_value = cleaned_df[col].mean()
-            st.write(f"**Data Report for Gauge Chart: {col}**")
-            st.write(
-                f"- Column: {col}\n"
-                f"- Average Value: {gauge_value:.2f}\n"
-                f"- Max Value: {cleaned_df[col].max():.2f}\n"
-                f"- Min Value: {cleaned_df[col].min():.2f}"
-            )
-            fig, ax = plt.subplots(figsize=(5, 3))
-            ax.barh([0], [gauge_value], color='blue', height=0.5)
-            ax.set_xlim(0, cleaned_df[col].max())
-            ax.set_title(f"Gauge Chart for {col}")
-            st.pyplot(fig)
-
+        for col in column_options:
+            st.write(f"#### **Column: {col}**")
+            
+            if cleaned_df[col].isnull().any():
+                missing_percentage = cleaned_df[col].isnull().mean() * 100
+                st.warning(f"Column '{col}' has {missing_percentage:.2f}% missing values. Consider handling missing data.")
+            
+            if visualization_type == "Histogram":
+                generate_histogram_with_gemini_insights(cleaned_df, col, model)
+            elif visualization_type == "Line Chart":
+                generate_line_chart_with_gemini_insights(cleaned_df, column_options, model)
+                break
+            elif visualization_type == "Box Plot":
+                generate_box_plot_with_gemini_insights(cleaned_df, col, model)
+            elif visualization_type == "Stacked Line Chart":
+                generate_stacked_line_chart_with_gemini_insights(cleaned_df, column_options, model)
+                break
+            elif visualization_type == "Gauge Chart":
+                generate_gauge_chart_with_gemini_insights(cleaned_df, col, model)
     except Exception as e:
         st.error(f"Error generating visualization: {e}")
+
+def get_dynamic_insights_gemini(prompt, model):
+    """
+    Generate dynamic insights using the Gemini API via the chat session model in config.py.
+    Args:
+        prompt (str): The prompt describing the data and visualization.
+        model (GenerativeModel): The pre-configured generative model from config.py.
+    Returns:
+        str: Generated insight from the Gemini API.
+    """
+    try:
+        # Start a chat session with the model
+        chat_session = model.start_chat(
+            history=[{"role": "user", "parts": ["The user uploaded a dataset."]}]
+        )
+        # Send the prompt and get the response
+        response = chat_session.send_message(prompt)
+        return response.text
+    except Exception as e:
+        return f"Unable to generate insights: {e}"
+
+# Modular functions for visualizations with Gemini API integration
+def generate_histogram_with_gemini_insights(df, col, model):
+    """
+    Generate a histogram with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write("A **Histogram** is a graphical representation of the distribution of a dataset. "
+            "It organizes the data into bins (intervals) and displays the frequency of data points within each bin. "
+            "This visualization is useful for understanding the shape, spread, and central tendency of the data.")
+    st.write(f"- Mean: {df[col].mean():.2f}")
+    st.write(f"- Median: {df[col].median():.2f}")
+    st.write(f"- Std Dev: {df[col].std():.2f}")
+    if df[col].skew() > 1:
+        st.warning("The data is highly skewed. Consider transforming it for better analysis.")
+    
+    fig = px.histogram(df, x=col, nbins=20, title=f"Histogram for {col}", marginal="box", color_discrete_sequence=["#636EFA"])
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a histogram visualization of the column and do not provide any negative thoughts about the dataset '{col}' with the following stats: mean={df[col].mean():.2f}, median={df[col].median():.2f}, std_dev={df[col].std():.2f}, skewness={df[col].skew():.2f}."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    # Using custom HTML to change the text color to white
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_line_chart_with_gemini_insights(df, columns, model):
+    """
+    Generate a line chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        columns (list): List of columns to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write("A **Line Chart** is a type of chart that displays information as a series of data points connected by straight lines. "
+                    "It is commonly used to visualize trends over time, showing changes in data across intervals or periods. "
+                    "This visualization is particularly useful for identifying patterns, relationships, and fluctuations in datasets.")
+    # Filter and clean data
+    df_filtered = df[columns].dropna()
+    if df_filtered.empty:
+        st.warning("No valid data to plot after removing rows with missing values.")
+        return
+    
+    # Create the line chart
+    fig = px.line(
+        df_filtered,
+        x=df_filtered.index,
+        y=columns,
+        markers=True,
+        title="Line Chart for Selected Columns",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate a more descriptive prompt
+    prompt = (
+        f"Analyze the trends, anomalies, and patterns in the following dataset columns: {columns}. "
+        f"The data represents numeric values over an index (e.g., time or row indices). "
+        f"Here are example values from the dataset:\n\n{df[columns].head(3).to_string(index=False)}\n\n"
+        f"Focus on trends like increasing or decreasing behavior, anomalies like outliers or sudden spikes, "
+        f"and patterns like cyclical or seasonal variations."
+    )
+    
+    # Fetch insights from Gemini API
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a line chart visualization of the following columns and do not provide any negative thoughts about the dataset: {columns}. Comment on trends, anomalies, or any interesting patterns."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_box_plot_with_gemini_insights(df, col, model):
+    """
+    Generate a box plot with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write("A **Box Plot** is a graphical representation of data that displays its distribution through five key summary statistics: "
+                    "minimum, first quartile (Q1), median, third quartile (Q3), and maximum. "
+                    "It is useful for identifying outliers, understanding variability, and comparing distributions across different groups.")
+
+    outliers = (
+        (df[col] < (df[col].quantile(0.25) - 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25)))) |
+        (df[col] > (df[col].quantile(0.75) + 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25))))
+    ).sum()
+    st.write(f"- Outliers detected: {outliers}")
+    
+    fig = px.box(df, y=col, title=f"Box Plot for {col}")
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a box plot visualization of the column '{col}', highlighting outliers and the spread of the data."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_stacked_line_chart_with_gemini_insights(df, columns, model):
+    """
+    Generate a stacked line chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        columns (list): List of columns to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write("A **Stacked Line Chart** is a variation of a line chart that displays multiple data series stacked on top of each other. "
+                        "It shows the cumulative effect of the data series, making it easy to visualize the contribution of each series to the total. "
+                        "This chart is particularly useful for understanding the composition and trends of data over time.")
+    fig = px.area(
+        df[columns],
+        title="Stacked Line Chart",
+        labels={"index": "Index"}
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a stacked line chart visualization of the following columns: {columns}. Focus on overlapping trends and cumulative values."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
+
+
+def generate_gauge_chart_with_gemini_insights(df, col, model):
+    """
+    Generate a gauge chart with dynamic insights from Gemini API.
+    Args:
+        df (pd.DataFrame): The dataset.
+        col (str): Column to visualize.
+        model (GenerativeModel): The configured Gemini model.
+    """
+    st.write("A **Gauge Chart** is a type of data visualization that represents a single data value within a range. "
+                    "It resembles a speedometer and is often used to display performance metrics, progress towards a goal, or other key indicators. "
+                    "This chart is particularly effective for quickly conveying whether a value falls within an acceptable range.")
+    gauge_value = df[col].mean()
+    st.write(f"- Average Value: {gauge_value:.2f}.")
+    
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=gauge_value,
+            title={'text': f"Gauge Chart for {col}"},
+            gauge={
+                'axis': {'range': [df[col].min(), df[col].max()]},
+                'bar': {'color': "darkblue"}
+            }
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Generate Gemini API insights
+    prompt = f"Provide insights for a gauge chart visualization of the column '{col}' with an average value of {gauge_value:.2f}."
+    ai_insight = get_dynamic_insights_gemini(prompt, model)
+    st.markdown(f'<div style="color: white; padding: 10px;">Gemini Insight: {ai_insight}</div>', unsafe_allow_html=True)
 
 def clean_data(df):
     """
