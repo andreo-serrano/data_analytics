@@ -72,4 +72,6 @@ uritemplate==4.1.1
 urllib3==2.2.3
 watchdog==6.0.0
 plotly>=5.0.0
+fpdf
+
 
